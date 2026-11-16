@@ -1,0 +1,42 @@
+
+{% extends "main/base.html" %}
+
+{% block content %}
+
+{% if items %}
+    {% for item in items %}
+        <div class="cart-item">
+            <div>
+                <h3>{{ item.product }}</h3>
+                <h3>{{ item.product.price }}</h3>
+                <h4>Кол-во: {{ item.quantity }}</h4>
+                <h4>Итого: {{ item.item_total }}</h4>
+            </div>
+
+            <div class="cart-buttons">
+                <form action="{% url 'remove_cart' item.product.id %}" method="post">
+                    {% csrf_token %}
+                    <button>Удалить</button>
+                </form>
+                <form action="{% url 'add_cart' item.product.id %}" method="post">
+                    {% csrf_token %}
+                    <button>+</button>
+                </form>
+                <form action="{% url 'minus_cart' item.product.id %}" method="post">
+                    {% csrf_token %}
+                    <button>-</button>
+                </form>
+            </div>
+        </div>
+    {% endfor %}
+
+    <div class="cart-total">
+        <h2>Всего товаров: {{ total_quantity }}</h2>
+        <h2>Итоговая цена: {{ total_price }}</h2>
+    </div>
+    <a href="{% url 'create_order' %}">Оформить заказ</a>
+{% else %}
+    <h3 class="empty-cart">Товаров в корзине пока нет</h3>
+{% endif %}
+
+{% endblock content %}
