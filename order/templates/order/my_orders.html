@@ -1,0 +1,17 @@
+{% extends "main/base.html" %}
+
+{% block title %}Мои заказы{% endblock title %}
+
+{% block content %}
+{% for order in orders %}    
+    {% if order.items.exists %}
+        <h2>{{ order.user_name }}</h2> 
+        <p>{{ order.phone_number }} {{ order.address }} | Дата создания: {{ order.created_at }} | Статус: {{ order.status }} | Способ получения: {{ order.delivery_method }}</p>
+        <p>Комментарий: {{ order.comment }}</p>
+        {% for item in order.items.all %}
+            <h4>{{ item.product.name }}</h4>
+            <p>Цена: {{ item.price }} | Кол-во: {{ item.quantity }}</p>
+        {% endfor %}
+    {% endif %}
+{% endfor %}
+{% endblock content %}

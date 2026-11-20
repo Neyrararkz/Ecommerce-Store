@@ -27,7 +27,10 @@ def create_order(request):
            
         form = OrderForm(request.POST)
         if form.is_valid():
-            order = form.save()
+            order = form.save(commit=False)
+            if request.user.is_authenticated:
+                order.user = request.user
+            order.save()
 
             for product in products:
                 OrderItem.objects.create(
@@ -52,3 +55,11 @@ def create_order(request):
         "items": items
     }
     return render(request, 'order/create_order.html', context)
+
+def my_orders(request):
+    orders = Order.objects.filter(user=request.user)
+
+    context = {
+        "orders": orders
+    }
+    return render(request, 'order/my_orders.html', context)

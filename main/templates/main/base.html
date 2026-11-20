@@ -15,13 +15,22 @@
             <a href="{% url 'main' %}" class="logo">🛍️ ShopName</a>
             <nav class="nav-links">
                 <a href="{% url 'main' %}">Главная</a>
-                <a href="{% url 'cart_detail' %}">Корзина</a>
-                <a href="#">Каталог</a>
-                <a href="#">О нас</a>
-                <a href="#">Контакты</a>
+                <a href="{% url 'my_orders' %}">Мои заказы</a>
+                <a href="{% url 'account_profile' %}">Профиль</a>
             </nav>
+            {% if user.is_authenticated %}
+                <p>Здравствуйте, {{ user.username }}</p>
+                <form action="{% url 'logout' %}" method="post">
+                    {% csrf_token %}
+                    <button type=submit>Выход</button>
+                </form>
+            {% else %}
+                <p>Вы вошли, как гость</p>
+                <a href="{% url 'register' %}">Регистрация</a>
+                <a href="{% url 'login' %}">Вход</a>
+            {% endif %}
             <div class="cart-icon">
-                🛒 <span class="cart-count">0</span>
+                <a href="{% url 'cart_detail' %}">🛒 <span class="cart-count">0</span></a>
             </div>
         </div>
     </header>

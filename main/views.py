@@ -4,6 +4,7 @@ from django.views.generic import TemplateView, ListView
 from django.db.models import Q  
 from django.views.decorators.http import require_POST
 from decimal import Decimal 
+from django.contrib.auth.forms import UserCreationForm
 
 class TestTemplateView(TemplateView):
     template_name = "main/test.html"
@@ -119,3 +120,23 @@ def detail_cart(request):
 
     return render(request, 'main/cart_detail.html', context)
 
+
+def register(request):
+    if request.method == "POST":
+        form = UserCreationForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('login')
+    else:
+        form = UserCreationForm()
+
+    context = {
+        "form": form
+    }
+    return render(request, 'main/register.html', context)
+
+def accounts_profile(request):
+    context = {
+        "user": request.user
+    }
+    return render(request, 'main/account_profile.html', context)
