@@ -30,3 +30,26 @@ class Product(models.Model):
     
     def __str__(self):
         return self.name
+    
+class Review(models.Model):
+    RATING_CHOICES = [
+        ("1", 1),
+        ("2", 2),
+        ("3", 3),
+        ("4", 4),
+        ("5", 5),
+    ]
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name="products")
+    author_name = models.CharField(max_length=100)
+    rating = models.CharField(choices=RATING_CHOICES)
+    text = models.TextField()
+    created_date = models.DateField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_date']
+        verbose_name = 'Отзыв'
+        verbose_name_plural = 'Отзывы'
+    
+    def __str__(self):
+        return self.product.name
+    

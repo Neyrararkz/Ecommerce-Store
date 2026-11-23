@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Category, Product
+from .models import Category, Product, Review
 
 # admin.site.register(Category)
 # admin.site.register(Product)
@@ -17,3 +17,4 @@ class ProductAdmin(admin.ModelAdmin):
     list_filter = ['name', 'price', 'category']
     list_editable = ['name', 'price']
 
+admin.site.register(Review)

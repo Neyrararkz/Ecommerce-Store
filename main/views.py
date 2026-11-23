@@ -1,10 +1,11 @@
 from django.shortcuts import render, get_object_or_404, redirect
-from .models import Category, Product
+from .models import Category, Product, Review
 from django.views.generic import TemplateView, ListView
 from django.db.models import Q  
 from django.views.decorators.http import require_POST
 from decimal import Decimal 
 from django.contrib.auth.forms import UserCreationForm
+from .forms import ReviewForm
 
 class TestTemplateView(TemplateView):
     template_name = "main/test.html"
@@ -49,14 +50,32 @@ class ProductListView(ListView):
         context["categories"] = Category.objects.all()
         context["category_select"] = self.category
         context["search_text"] = self.searchText
+        context["reviews"] = Review.objects.all()
         print(context)
         return context
         
 
 def product_detail(request, pk, slug):
     product = get_object_or_404(Product, pk=pk, slug=slug)
+    reviews = Review.objects.filter(product=product)
+    error = ''
+
+    if request.method == "POST":
+        form = ReviewForm(request.POST)
+        if form.is_valid():
+            review = form.save(commit=False)
+            review.product = product
+            form.save()
+        else:
+            error = "Некорректная форма"
+    else:
+        form = ReviewForm()
+
     context = {
-        "product": product
+        "product": product,
+        "reviews": reviews,
+        "form": form,
+        "error": error
     }
     return render(request, "main/product_detail.html", context)
 
