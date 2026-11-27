@@ -6,26 +6,10 @@ from django.views.decorators.http import require_POST
 from decimal import Decimal 
 from django.contrib.auth.forms import UserCreationForm
 from .forms import ReviewForm
+from django.core.paginator import Paginator
 
 class TestTemplateView(TemplateView):
     template_name = "main/test.html"
-
-def index(request):
-    category = request.GET.get('category', 'all')
-    products = Product.objects.filter(available=True)
-    categories = Category.objects.all()
-
-    if category != "all":
-        # ct = get_object_or_404(Category, slug=category)
-        products = products.filter(category__slug=category)
-
-    context = {
-        "products": products,
-        "categories": categories,
-        "category_select": category,
-    }
-    return render(request, 'main/index.html', context)
-
 
 class ProductListView(ListView):
     model = Product
@@ -41,17 +25,63 @@ class ProductListView(ListView):
             products = products.filter(category__slug=self.category)
         if (self.searchText != ""):
             products = products.filter(Q(name__icontains=self.searchText) | Q(description__icontains=self.searchText))
-        
+        self.sort_price = self.request.GET.get("sort_price", "")
+        self.sort_name = self.request.GET.get("sort_name", "")
+        ordering = {
+            "price_asc": "price",
+            "price_desc": "-price",
+            "name_asc": "name",
+            "name_desc": "-name"
+        }
+        selected_option_price = ordering.get(self.sort_price, "id")    
+        selected_option_name = ordering.get(self.sort_name, "id")
+        if selected_option_price != "id" or selected_option_name != "id":
+            if selected_option_price != "id" and selected_option_name != "id":
+                products = products.order_by(selected_option_price, selected_option_name, "id")
+            elif selected_option_price != "id" and selected_option_name == "id":
+                products = products.order_by(selected_option_price, "id")
+            elif selected_option_price == "id" and selected_option_name != "id":
+                products = products.order_by(selected_option_name, "id")
+        else:
+            products = products.order_by("id")      
+
+        self.per_page = self.request.GET.get("per_page", "6")
+
+        self.products_paginator = Paginator(products, self.per_page)
+        self.page_number = self.request.GET.get("page", "")
+        self.page = self.products_paginator.get_page(self.page_number)
+
+        self.start_index = self.page.start_index
+        self.end_index = self.page.end_index
+        self.count = self.products_paginator.count
         return products
 
     def get_context_data(self, **kwargs):
+        
+
         context = super().get_context_data(**kwargs)
         context["title"] = "Главная страница"
         context["categories"] = Category.objects.all()
         context["category_select"] = self.category
         context["search_text"] = self.searchText
         context["reviews"] = Review.objects.all()
-        print(context)
+        context["sort_price_selected"] = self.sort_price
+        context["sort_name_selected"] = self.sort_name
+        context["per_page_selected"] = self.per_page
+        context["products_paginator"] = self.products_paginator
+        context["page_number"] = self.page_number
+        context["page"] = self.page
+        context["start_index"] = self.start_index
+        context["end_index"] = self.end_index
+        context["count"] = self.count
+        print(self.products_paginator.object_list)        
+        print(self.products_paginator.get_page(1).object_list)
+
+        params = self.request.GET.copy()
+        params.pop("page", None) 
+        params = params.urlencode()
+        context["params"] = params
+
         return context
         
 

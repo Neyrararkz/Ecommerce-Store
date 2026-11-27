@@ -13,11 +13,30 @@
                 </option>
             {% endfor %}
         </select>
+        <select name="sort_price" onchange="this.form.submit()">
+            <option value="">По умолчанию</option>
+            <option value="price_asc" {% if sort_price_selected == "price_asc" %}selected{% endif %}>От дешевых к дорогим</option>
+            <option value="price_desc" {% if sort_price_selected == "price_desc" %}selected{% endif %}>От дорогих к дешевым</option>
+        </select>
+        <select name="sort_name" onchange="this.form.submit()">
+            <option value="">По умолчанию</option>
+            <option value="name_asc" {% if sort_name_selected == "name_asc" %}selected{% endif %}>По названию А—Я</option>
+            <option value="name_desc" {% if sort_name_selected == "name_desc" %}selected{% endif %}>По названию Я—А</option>
+        </select>
+        <select name="per_page" onchange="this.form.submit()">
+            <option value="3" {% if per_page_selected == "3" %}selected{% endif %}>Товаров на странице: 3</option>
+            <option value="6" {% if per_page_selected == "6" %}selected{% endif %}>Товаров на странице: 6</option>
+            <option value="12" {% if per_page_selected == "12" %}selected{% endif %}>Товаров на странице: 12</option>
+        </select>
+        <input type="hidden" value={{ page.number }} name="page">
+        <a href="{% url 'main' %}">Сбросить фильтры</a>
     </form>
+
+    <p>{{ start_index }}–{{ end_index}} из {{ count}}</p>
 
     <!-- Список продуктов -->
     <div class="products-grid">
-        {% for product in products %}
+        {% for product in page %}
             <div class="product-card">
                 <!-- Здесь можно добавить вывод изображения, если оно есть -->
                 <div style="padding: 20px;">
@@ -49,5 +68,16 @@
         {% empty %}
             <p>Товары не найдены.</p>
         {% endfor %}
+        {% if page.has_other_pages %}
+            <nav>
+                {% if page.has_previous %}
+                    <a href="?{% if params %}{{ params }}&{% endif %}page={{ page.previous_page_number }}">←</a>
+                {% endif %}
+                <span>{{ page.number }}</span>
+                {% if page.has_next %}
+                    <a href="?{% if params %}{{ params }}&{% endif %}page={{ page.next_page_number}}">→</a>
+                {% endif %}
+            </nav>
+        {% endif %}
     </div>
 {% endblock %}
